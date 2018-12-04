@@ -1,6 +1,6 @@
 ---
-title: "Exemplos"
-subtitle: "Disciplina: Análise de Dados Categorizados - EST - UnB"
+title: "Teoria de Resposta ao Item - exemplos"
+subtitle: "Disciplina: Teoria de Resposta ao Item - EST - UnB"
 date: "**Junho de 2018**"
 output: html_document
 ---
@@ -25,7 +25,7 @@ htmltools::img(src = knitr::image_uri(file.path(R.home("doc"), "html", "logo.jpg
 ```
 
 
-Esta página foi elaborada como parte do Trabalho Final da **Disciplina de Análise de Dados Categorizados** ministrada pelo **Prof. Dr. George Freitas von Borries** no curso de graduação em **Estatística** da **UnB**.
+Esta página foi elaborada para compilar alguns dos trabalhos realizados durante a **Disciplina de Teoria de Resposta ao Item** ministrada pelo **Prof. Dr. Antônio Eduardo Gomes** no curso de graduação em **Estatística** da **UnB**.
 
 Nos links abaixo você encontrará exemplos com aplicações dos conceitos trabalhados na disciplina - todos implementados em linguagem **R**.
 
@@ -34,43 +34,16 @@ Nos links abaixo você encontrará exemplos com aplicações dos conceitos traba
 
 ---
 
-#### **Regressão Logística**
+#### **Métodos de Equalização de Scores**
 
-- [**Challenger**](https://allanvc.github.io/categorical_data_analysis/exemplos/challenger/){target="_blank"}
 
-- [**Beetles**](https://allanvc.github.io/categorical_data_analysis/exemplos/beetles/){target="_blank"}
-
-- [**Horseshoe Crabs**](https://allanvc.github.io/categorical_data_analysis/exemplos/crabs/){target="_blank"}
-
-- [**Reação Alérgica**](https://allanvc.github.io/categorical_data_analysis/exemplos/renal/){target="_blank"}
+- [**Lista 3**](https://allanvc.github.io/TRI/lista3/lista3.pdf){target="_blank"}/ [**Resolução**](https://allanvc.github.io/TRI/lista4/){target="_blank"} 
 
 ---
 
-#### **Modelos Logito Multicategorizados**
+#### **Modelo de Resposta Gradual**
 
-- [**Alligator**](https://allanvc.github.io/categorical_data_analysis/exemplos/alligator/){target="_blank"}
+- [**Lista 4**](https://allanvc.github.io/TRI/lista4/lista4.pdf){target="_blank"}/ [**Resolução**](https://allanvc.github.io/TRI/lista4/){target="_blank"}
 
-- [**Ideologia**](https://allanvc.github.io/categorical_data_analysis/exemplos/ideologia/){target="_blank"}
 
-- [**Saúde Mental**](https://allanvc.github.io/categorical_data_analysis/exemplos/mental/){target="_blank"}
-
----
-
-#### **Modelos Log-Lineares**
-
-- [**Credo em vida após a morte**](https://allanvc.github.io/categorical_data_analysis/exemplos/afterlife/){target="_blank"}
-
-- [**Uso de álcool, cigarro e maconha**](https://allanvc.github.io/categorical_data_analysis/exemplos/drugs/){target="_blank"}
-
----
-
-#### **Modelos para Dados Pareados**
-
-- [**Avaliação de Político**](https://allanvc.github.io/categorical_data_analysis/exemplos/politico/){target="_blank"}
-
----
-
-#### **EXTRA -- Demonstação**
-
-- [**Shiny App Curva ROC**](https://allanvc.shinyapps.io/roc_app/){target="_blank"}
 
