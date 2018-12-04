@@ -37,13 +37,13 @@ Nos links abaixo você encontrará exemplos com aplicações dos conceitos traba
 #### **Métodos de Equalização de Scores**
 
 
-- [**Lista 3**](https://allanvc.github.io/TRI/lista3/lista3.pdf){target="_blank"}/ [**Resolução**](https://allanvc.github.io/TRI/lista4/){target="_blank"} 
+- [**Lista 3**](https://allanvc.github.io/TRI2/lista3/lista3.pdf){target="_blank"}/ [**Resolução**](https://allanvc.github.io/TRI2/lista4/){target="_blank"} 
 
 ---
 
 #### **Modelo de Resposta Gradual**
 
-- [**Lista 4**](https://allanvc.github.io/TRI/lista4/lista4.pdf){target="_blank"}/ [**Resolução**](https://allanvc.github.io/TRI/lista4/){target="_blank"}
+- [**Lista 4**](https://allanvc.github.io/TRI2/lista4/lista4.pdf){target="_blank"}/ [**Resolução**](https://allanvc.github.io/TRI2/lista4/){target="_blank"}
 
 
 
