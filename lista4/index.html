@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Allan Vieira 14/0128492" />
+
+<meta name="date" content="2018-05-29" />
+
+<title>Lista 4</title>
+
+<script src="notebook_lista4_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="notebook_lista4_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="notebook_lista4_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="notebook_lista4_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="notebook_lista4_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="notebook_lista4_files/navigation-1.1/tabsets.js"></script>
+<link href="notebook_lista4_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="notebook_lista4_files/highlightjs-9.12.0/highlight.js"></script>
+<link href="notebook_lista4_files/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="notebook_lista4_files/pagedtable-1.1/js/pagedtable.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lista 4</h1>
+<h3 class="subtitle"><em>Teoria de Resposta ao Item</em></h3>
+<h4 class="author"><em>Allan Vieira 14/0128492</em></h4>
+<h4 class="date"><em>May 29, 2018</em></h4>
+
+</div>
+
+
+<!-- self_contained: false --- para nao dar pau do plotly com firefox -->
+<!-- df_print para as formas de imprimir data frames e tibbles -->
+<!-- ver https://rmarkdown.rstudio.com/html_document_format.html -->
+<!-- incluir no cabecalho: -->
+<!-- always_allow_html: yes  -->
+<!--para quando formos passar para pdf -->
+<style>
+body {
+text-align: justify}
+</style>
+<!-- para justificar texto no markdown -->
+<!-- https://stackoverflow.com/questions/43222169/how-to-justify-the-text-to-both-sides-when-knitting-html-in-rmarkdown -->
+<!-- <style> -->
+<!--   .col2 { -->
+<!--     columns: 2 200px;         /* number of columns and width in pixels*/ -->
+<!--     -webkit-columns: 2 200px; /* chrome, safari */ -->
+<!--     -moz-columns: 2 200px;    /* firefox */ -->
+<!--   } -->
+<!--   .col3 { -->
+<!--     columns: 3 100px; -->
+<!--     -webkit-columns: 3 100px; -->
+<!--     -moz-columns: 3 100px; -->
+<!--   } -->
+<!-- </style> -->
+<!-- esse de cima funciona no output do RStudio, mas nao nos browsers -->
+<!-- tb em: https://stackoverflow.com/questions/31753897/2-column-section-in-r-markdown -->
+<hr />
+<hr />
+<div id="section" class="section level3">
+<h3>1)</h3>
+<p>O modelo de resposta gradual foi ajustado aos dados originais (não disponı́veis). Use as estimativas dos parâmetros (disponı́vel no código) para gerar respostas para 1000 alunos. Use o pacote “mirt” do R para ajustar o modelo de resposta gradual às respostas geradas.</p>
+<hr />
+<p>Carregamento dos pacotes utilizados:</p>
+<pre class="r"><code>library(dplyr)
+library(irtoys)
+library(mirt)
+library(ggplot2)
+library(reshape2)
+
+set.seed(2345) # semente</code></pre>
+<p></p>
+<p>Preparação:</p>
+<pre class="r"><code>### Valores estimados dos parametros no modelo de resposta gradual
+### para o questionario de hiperatividade em 
+### Costa, M.C.M (2014) - Aplicando a Teoria de Resposta ao Item a 
+### dados psicométricos, UFRJ.
+
+a.par &lt;- c(2.258,2.019,2.250,2.072,2.654,2.873,3.475,3.465,2.949)
+b1.par &lt;- c(-0.347,-0.144,0.615,0.317,0.269,-0.321,-0.289,-0.489,-0.547)
+b2.par &lt;- c(0.527,0.708,1.342,1.437,1.138,0.444,0.592,0.303,0.311)
+b3.par &lt;- c(1.515,1.560,1.959,1.986,1.940,1.452,1.622,1.210,1.409)
+n.itens &lt;- length(a.par)
+
+nr &lt;- 1000 # numero de respondentes
+
+### geracao das proficiencias
+
+theta &lt;- rnorm(nr,0,1)
+resp &lt;- matrix(0,nr,n.itens)
+
+
+### geracao das respostas
+
+mat.prob &lt;- matrix(0,n.itens,4)
+for (j in 1:nr) {
+  mat.prob &lt;- cbind(rep(0,n.itens),exp(-a.par*(theta[j]-b1.par)),exp(-a.par*(theta[j]-b2.par)),exp(-a.par*(theta[j]-b3.par)))
+  mat.prob &lt;- 1/(1+mat.prob)
+  mat.prob &lt;- cbind(-t(apply(mat.prob,1,diff)),mat.prob[,4])
+  for (i in 1:n.itens)
+    resp[j,i] &lt;- sample(4,1,replace=F,mat.prob[i,])
+}
+
+### ajuste do modelo de resposta gradual via &quot;mirt&quot; utilizando as respostas simuladas
+
+# write(t(resp),file=&quot;/home/allan/Documents/1S2018/TRI/unidade4/lista4/dados.mrg.txt&quot;,ncol=9)
+resp &lt;- read.table(file=&quot;/home/allan/Documents/1S2018/TRI/unidade4/lista4/dados.mrg.txt&quot;)</code></pre>
+<p></p>
+<p>Ajuste do modelo:</p>
+<pre class="r"><code># --- 2ª parte - utilizar as respostas geradas (com os thetas simulados) para estimar novos parametros
+### ajuste do modelo de resposta gradual via &quot;mirt&quot; utilizando as respostas simuladas
+mrg &lt;- mirt(resp,1,itemtype=c(&#39;graded&#39;))
+
+prof.est &lt;- fscores(mrg, full.scores=TRUE)
+par.est &lt;- coef(mrg,IRTpars=TRUE)
+
+# plot(theta,prof.est)
+# abline(0,1)</code></pre>
+<p></p>
+<hr />
+</div>
+<div id="section-1" class="section level3">
+<h3>2)</h3>
+<p>Elabore gráficos com as curvas carcterísticas de cada item, i.e., <span class="math inline">\(P_{ik}^{+}(\theta)\)</span> para as categorias de cada item.</p>
+<hr />
+<p><strong>Curvas Características dos Itens (CCI):</strong></p>
+<p></p>
+<p>Preparando os dados para gerar os gráficos:</p>
+<pre class="r"><code># --- 3ª parte - preparar os dados para gerar as CCI&#39;s
+
+###  objetivo: grafico com as CCI &#39; s de cada item POR CATEGORIA
+# usar facett_wrap para itens
+
+# retirando ultimo item da lista par.est
+par.est2 &lt;- par.est[-length(par.est)]
+
+# passando de lista para matriz
+par.est_n &lt;- Reduce(&#39;rbind&#39;, par.est2)
+
+
+a.par_n &lt;- par.est_n[,1]
+b1.par_n &lt;- par.est_n[,2]
+b2.par_n &lt;- par.est_n[,3]
+b3.par_n &lt;- par.est_n[,4]
+
+
+### geracao das proficiencias
+# theta &lt;- rnorm(nr,0,1)
+# criando um range gde de thetas
+xtheta &lt;- seq(-5,5, 0.01)</code></pre>
+<p></p>
+<p>Calculo das probabilidades:</p>
+<pre class="r"><code># ---------------- probabilidades P+
+
+
+### geracao das respostas
+
+# matriz para guardar a sprobabilidades
+# mat.prob_n &lt;- matrix(0,n.itens,length(theta)) #teremos 1 matriz 9x4 para cada respondente (theta_j)
+
+mat.prob_n &lt;- matrix()
+
+# # lista para guardar as matrizes
+lista_mat.prob_n &lt;- list() # nao precisaremos agora
+
+for (j in 1:length(xtheta)) {
+  # calculo das proobabilidades para cada b_k dentro da formula da prob P_ik(theta_j)
+  prob_b1 &lt;- 1/(1+exp(-a.par_n*(xtheta[j]-b1.par_n)))
+  prob_b2 &lt;- 1/(1+exp(-a.par_n*(xtheta[j]-b2.par_n)))
+  prob_b3 &lt;- 1/(1+exp(-a.par_n*(xtheta[j]-b3.par_n)))
+  prob_b4 &lt;- rep(1, n.itens) #b_0
+  # exp(-a.par_n*(theta[j]-b2.par_n)),
+  # exp(-a.par_n*(theta[j]-b3.par_n)))
+  
+  mat.prob_n &lt;- cbind(prob_b1, prob_b2, prob_b3, prob_b4)
+  
+  # nao estah guadando a probabilidade
+  lista_mat.prob_n[[j]] &lt;- mat.prob_n # nao eh necessario - depois so pegaremos um range de theta
+  
+}
+
+
+mat.prob_geral_n &lt;- Reduce(&quot;rbind&quot;, lista_mat.prob_n)
+
+head(as.data.frame(mat.prob_geral_n, row.names = FALSE),18)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["prob_b1"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["prob_b2"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["prob_b3"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["prob_b4"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"4.804771e-05","2":"6.877882e-06","3":"7.599298e-07","4":"1","_rn_":"1"},{"1":"5.604713e-05","2":"1.023009e-05","3":"1.983083e-06","4":"1","_rn_":"2"},{"1":"2.311960e-06","2":"4.711460e-07","3":"1.280631e-07","4":"1","_rn_":"3"},{"1":"1.578087e-05","2":"1.567142e-06","3":"5.728571e-07","4":"1","_rn_":"4"},{"1":"9.862609e-07","2":"8.499585e-08","3":"1.408691e-08","4":"1","_rn_":"5"},{"1":"6.610865e-07","2":"7.588936e-08","3":"3.952578e-09","4":"1","_rn_":"6"},{"1":"4.160286e-08","2":"2.120206e-09","3":"4.838919e-11","4":"1","_rn_":"7"},{"1":"5.801946e-08","2":"4.281607e-09","3":"1.486120e-10","4":"1","_rn_":"8"},{"1":"1.920899e-06","2":"1.703460e-07","3":"5.657055e-09","4":"1","_rn_":"9"},{"1":"4.908236e-05","2":"7.025995e-06","3":"7.762947e-07","4":"1","_rn_":"10"},{"1":"5.717628e-05","2":"1.043620e-05","3":"2.023038e-06","4":"1","_rn_":"11"},{"1":"2.365424e-06","2":"4.820413e-07","3":"1.310246e-07","4":"1","_rn_":"12"},{"1":"1.611075e-05","2":"1.599902e-06","3":"5.848321e-07","4":"1","_rn_":"13"},{"1":"1.012357e-06","2":"8.724478e-08","3":"1.445964e-08","4":"1","_rn_":"14"},{"1":"6.811569e-07","2":"7.819334e-08","3":"4.072577e-09","4":"1","_rn_":"15"},{"1":"4.311670e-08","2":"2.197356e-09","3":"5.014996e-11","4":"1","_rn_":"16"},{"1":"6.017060e-08","2":"4.440353e-09","3":"1.541220e-10","4":"1","_rn_":"17"},{"1":"1.978075e-06","2":"1.754164e-07","3":"5.825439e-09","4":"1","_rn_":"18"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p></p>
+<p>Gráfico:</p>
+<pre class="r"><code>data_long_n &lt;- as.data.frame(cbind(rep(1:9, nrow(mat.prob_geral_n)/9), rep(xtheta, each=9), mat.prob_geral_n))
+
+colnames(data_long_n) &lt;- c(&quot;item&quot;, &quot;xtheta&quot;, &quot;b1&quot;, &quot;b2&quot;, &quot;b3&quot;, &quot;b4&quot;)
+
+# se nao der certo, fazer por apply no ggplot
+
+data_long_n2 &lt;- data_long_n %&gt;%
+  melt(id = 1:2)
+
+mypalette &lt;- c( &#39;#e6194b&#39; , &quot;#3cb44b&quot;, &quot;#ffe119&quot;, &#39;#aa6e28&#39;)
+
+p1 &lt;- data_long_n2 %&gt;%
+  ggplot(aes(x=xtheta, y=value, colour=as.factor(as.character(variable)))) +
+  # colour precisa ser passada dentro do aesthetics para funcionar!
+  # sol: https://stackoverflow.com/questions/3777174/
+  #plotting-two-variables-as-lines-using-ggplot2-on-the-same-graph
+  geom_line()+
+  xlab( &#39; Theta &#39; )+
+  ylab(&quot;Prob&quot;)+
+  facet_wrap(~as.factor(item))+
+  scale_color_discrete(name = &quot;Legenda&quot;)+
+  ggtitle( &#39;Curvas Características de cada Item para cada Categoria k&#39; )+
+  theme(plot.title = element_text(hjust=0.5))
+# scale_color_discrete(&quot;Item&quot;, breaks=as.character(1:14))+
+# para acertar ordem dos fatores na legenda
+# pq estamos usando scale_color_discrete
+# scale_colour_manual(&quot;Item&quot;, breaks=as.character(1:14), values=mypalette)
+p1</code></pre>
+<p><img src="notebook_lista4_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p></p>
+<p><strong>Probabilidades Exatas:</strong></p>
+<p></p>
+<p>Calculo das probabilidades exatas:</p>
+<pre class="r"><code># ---------------- probabilidades exatas
+
+### geracao das respostas
+
+# matriz para guardar a sprobabilidades
+# mat.prob_n &lt;- matrix(0,n.itens,length(theta)) #teremos 1 matriz 9x4 para cada respondente (theta_j)
+mat.prob_n &lt;- matrix()
+
+# lista para guardar as matrizes
+lista_mat.prob_n &lt;- list()
+
+for (j in 1:length(xtheta)) {
+  # calculo do exponencial para cada b_k dentro da formula da prob P_ik(theta_j)
+  mat.prob_n &lt;- cbind(rep(0,n.itens),
+                    exp(-a.par_n*(xtheta[j]-b1.par_n)),
+                    exp(-a.par_n*(xtheta[j]-b2.par_n)),
+                    exp(-a.par_n*(xtheta[j]-b3.par_n)))
+  
+  # calculo da probabilidade
+  mat.prob_n &lt;- 1/(1+mat.prob_n)
+  
+  # para calcular o que falta para dar 1 na prob
+  mat.prob_n &lt;- cbind(-t(apply(mat.prob_n,1,diff)),mat.prob_n[,4])
+  
+  lista_mat.prob_n[[j]] &lt;- mat.prob_n 
+  
+}
+
+mat.prob_geral_n &lt;- Reduce(&quot;rbind&quot;, lista_mat.prob_n)
+
+head(as.data.frame(mat.prob_geral_n, row.names = FALSE),18)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["V1"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["V2"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["V3"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["V4"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.9999520","2":"4.116983e-05","3":"6.117952e-06","4":"7.599298e-07","_rn_":"1"},{"1":"0.9999440","2":"4.581704e-05","3":"8.247009e-06","4":"1.983083e-06","_rn_":"2"},{"1":"0.9999977","2":"1.840814e-06","3":"3.430829e-07","4":"1.280631e-07","_rn_":"3"},{"1":"0.9999842","2":"1.421373e-05","3":"9.942853e-07","4":"5.728571e-07","_rn_":"4"},{"1":"0.9999990","2":"9.012650e-07","3":"7.090895e-08","4":"1.408691e-08","_rn_":"5"},{"1":"0.9999993","2":"5.851971e-07","3":"7.193679e-08","4":"3.952578e-09","_rn_":"6"},{"1":"1.0000000","2":"3.948266e-08","3":"2.071817e-09","4":"4.838919e-11","_rn_":"7"},{"1":"0.9999999","2":"5.373785e-08","3":"4.132995e-09","4":"1.486120e-10","_rn_":"8"},{"1":"0.9999981","2":"1.750553e-06","3":"1.646890e-07","4":"5.657055e-09","_rn_":"9"},{"1":"0.9999509","2":"4.205637e-05","3":"6.249700e-06","4":"7.762947e-07","_rn_":"10"},{"1":"0.9999428","2":"4.674008e-05","3":"8.413164e-06","4":"2.023038e-06","_rn_":"11"},{"1":"0.9999976","2":"1.883383e-06","3":"3.510167e-07","4":"1.310246e-07","_rn_":"12"},{"1":"0.9999839","2":"1.451085e-05","3":"1.015070e-06","4":"5.848321e-07","_rn_":"13"},{"1":"0.9999990","2":"9.251118e-07","3":"7.278514e-08","4":"1.445964e-08","_rn_":"14"},{"1":"0.9999993","2":"6.029635e-07","3":"7.412077e-08","4":"4.072577e-09","_rn_":"15"},{"1":"1.0000000","2":"4.091934e-08","3":"2.147206e-09","4":"5.014996e-11","_rn_":"16"},{"1":"0.9999999","2":"5.573025e-08","3":"4.286231e-09","4":"1.541220e-10","_rn_":"17"},{"1":"0.9999980","2":"1.802658e-06","3":"1.695910e-07","4":"5.825439e-09","_rn_":"18"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p></p>
+<p>Gráfico:</p>
+<pre class="r"><code>data_long_n &lt;- as.data.frame(cbind(rep(1:9, nrow(mat.prob_geral_n)/9), rep(xtheta, each=9), mat.prob_geral_n))
+
+colnames(data_long_n) &lt;- c(&quot;item&quot;, &quot;xtheta&quot;, &quot;b1&quot;, &quot;b2&quot;, &quot;b3&quot;, &quot;b4&quot;)
+
+# se nao der certo, fazer por apply no ggplot
+
+data_long_n2 &lt;- data_long_n %&gt;%
+  melt(id = 1:2)
+
+mypalette &lt;- c( &#39;#e6194b&#39; , &quot;#3cb44b&quot;, &quot;#ffe119&quot;, &#39;#aa6e28&#39;)
+
+p2 &lt;- data_long_n2 %&gt;%
+  ggplot(aes(x=xtheta, y=value, colour=as.factor(as.character(variable)))) +
+  # colour precisa ser passada dentro do aesthetics para funcionar!
+  # sol: https://stackoverflow.com/questions/3777174/
+  #plotting-two-variables-as-lines-using-ggplot2-on-the-same-graph
+  geom_line()+
+  xlab( &#39;Theta&#39; )+
+  ylab(&quot;Prob&quot;)+
+  facet_wrap(~as.factor(item))+
+  scale_color_discrete(name = &quot;Legenda&quot;)+
+  ggtitle( &#39;Probabilidade de Responder Exatamente uma Categoria k&#39; )+
+  theme(plot.title = element_text(hjust=0.5))
+# scale_color_discrete(&quot;Item&quot;, breaks=as.character(1:14))+
+# para acertar ordem dos fatores na legenda
+# pq estamos usando scale_color_discrete
+# scale_colour_manual(&quot;Item&quot;, breaks=as.character(1:14), values=mypalette)
+p2</code></pre>
+<p><img src="notebook_lista4_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p></p>
+<hr />
+</div>
+<div id="section-2" class="section level3">
+<h3>3)</h3>
+<p>Com base nas estimativas dos parâmetros <span class="math inline">\(b_{ik}\)</span>, <span class="math inline">\(i = 1,2,...,9\)</span>, <span class="math inline">\(k = 1,2,3\)</span>, você indicaria itens com categorias que poderiam ser aglutinadas?</p>
+<hr />
+<p>Com base nos gráficos acima, não indicaria itens com categorias que poderiam ser aglutinadas, uma vez que não há curvas extremamente próximas uma das outras, ou seja, os valores de <span class="math inline">\(b_k\)</span> em cada item não são tão próximos</p>
+<hr />
+</div>
+<div id="section-3" class="section level3">
+<h3>4)</h3>
+<p>Obtidas as novas estimativas dos parâmetros dos itens e das proficiências a partir das respostas simuladas para os 1000 respondentes, elabore um gráfico das proficiências estimadas versus proficiências verdadeiras. Analise o gráfico.</p>
+<hr />
+<pre class="r"><code>library(ggplot2)
+p3 &lt;- ggplot()+
+  geom_point(aes(x=theta, y=prof.est), colour=&quot;orange&quot;)+
+  geom_abline(intercept = 0, slope=1)+
+  xlab( &quot;theta real&quot; )+
+  ylab(&quot;theta estimado&quot;)+
+  labs(title=&quot;Proficiências&quot;)+
+  theme(plot.title = element_text(hjust=0.5))
+
+p3</code></pre>
+<p><img src="notebook_lista4_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>O gráfico mostra diversos pontos aglutinados formando algo parecido com uma reta na porção esquerda inferior do gráfico. Esta “reta” diz respeito a empates que estão ocorrendo nos valores de proficiência mínima - ou seja - nosso modelo de 9 itens não está discriminando muito bem aqueles alunos que estão nas proficiências mínimas. Quando fazemos as estimações, estes alunos apresentam proficiência igual quando na verdade são diferentes.</p>
+<hr />
+</div>
+<div id="section-4" class="section level3">
+<h3>5)</h3>
+<p>Identifique as respostas dos alunos com proficiência estimada mı́nima e máxima. Na sua opinião, qual a explicação para a ocorrência de muitos empates nos valores das proficiências estimadas mı́nimas?</p>
+<hr />
+<pre class="r"><code>resp[prof.est==min(prof.est),]</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["V1"],"name":[1],"type":["int"],"align":["right"]},{"label":["V2"],"name":[2],"type":["int"],"align":["right"]},{"label":["V3"],"name":[3],"type":["int"],"align":["right"]},{"label":["V4"],"name":[4],"type":["int"],"align":["right"]},{"label":["V5"],"name":[5],"type":["int"],"align":["right"]},{"label":["V6"],"name":[6],"type":["int"],"align":["right"]},{"label":["V7"],"name":[7],"type":["int"],"align":["right"]},{"label":["V8"],"name":[8],"type":["int"],"align":["right"]},{"label":["V9"],"name":[9],"type":["int"],"align":["right"]}],"data":[{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"1"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"18"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"20"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"34"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"47"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"50"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"64"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"71"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"73"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"80"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"81"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"95"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"119"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"124"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"142"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"149"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"157"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"169"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"173"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"176"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"183"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"190"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"192"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"193"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"207"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"210"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"217"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"219"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"221"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"225"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"231"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"232"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"241"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"279"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"281"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"286"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"304"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"363"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"366"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"371"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"374"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"380"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"399"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"401"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"402"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"408"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"409"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"431"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"436"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"452"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"454"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"457"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"459"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"468"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"481"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"484"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"485"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"486"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"487"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"489"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"501"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"512"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"514"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"520"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"546"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"551"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"557"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"588"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"594"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"603"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"605"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"606"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"611"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"612"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"615"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"632"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"636"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"646"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"647"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"654"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"665"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"667"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"672"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"686"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"698"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"699"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"718"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"732"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"734"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"738"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"741"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"743"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"746"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"752"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"767"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"772"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"773"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"774"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"791"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"796"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"804"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"810"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"818"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"822"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"832"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"840"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"845"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"853"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"854"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"859"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"862"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"871"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"880"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"885"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"895"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"898"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"907"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"914"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"915"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"923"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"937"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"939"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"944"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"945"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"950"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"952"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"961"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"964"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"966"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"970"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"973"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"981"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"982"},{"1":"1","2":"1","3":"1","4":"1","5":"1","6":"1","7":"1","8":"1","9":"1","_rn_":"986"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>A explicação provável seria o baixo número de itens em nosso teste. Com um baixo número de itens, há maior chance de que ocorra estimativas de proficiências iguais.</p>
+<hr />
+</div>
+<div id="section-5" class="section level3">
+<h3>6)</h3>
+<p>Compare graficamente as estimativas dos parâmetros dos 9 itens obtidas a partir das respostas simuladas com aquelas fornecidas originalmente.</p>
+<hr />
+<pre class="r"><code># Preparando os dados:
+
+a &lt;- c(2.258, 2.019, 2.250, 2.072, 2.654, 2.873, 3.475, 3.465, 2.949)
+b1 &lt;- c(-0.347, -0.144, 0.615, 0.317, 0.269, -0.321, -0.289, -0.489, -0.547)
+b2 &lt;- c(0.527, 0.708, 1.342, 1.437, 1.138, 0.444, 0.592, 0.303, 0.311)
+b3 &lt;- c(1.515, 1.560, 1.959, 1.986, 1.940, 1.452, 1.622, 1.210, 1.409)
+
+par.real &lt;- as.data.frame(cbind(item = 1:9, a, b1, b2, b3), row.names = FALSE)
+
+par.est_n2 &lt;- as.data.frame(cbind(item = 1:9, par.est_n), row.names = FALSE)
+
+library(reshape2)
+# ideia separar em dois data.frames, fazer um melt por item e depois fazer um merge
+# coluna x vem de real, coluna y vem de estimado
+# depois usamos o facet_wrap do ggplot2
+
+
+par_long_x &lt;- par.real %&gt;%
+  melt(id=&quot;item&quot;) %&gt;%
+  dplyr::rename(x=value)
+  
+
+par_long_y &lt;- par.est_n2 %&gt;%
+  melt(id=&quot;item&quot;) %&gt;%
+  dplyr::rename(y=value)
+
+
+par_long &lt;- merge(par_long_x, par_long_y)
+
+
+# grafico:
+
+p4 &lt;- par_long %&gt;%
+  ggplot()+
+  geom_point(aes(x=x, y=y, colour=variable))+
+  geom_abline(intercept = 0, slope=1, size=0.3)+
+  facet_wrap(~variable)+
+  xlab( &quot;real&quot; )+
+  ylab(&quot;estimado&quot;)+
+  labs(title=&quot;Parâmetros estimados vs reais&quot;)+
+  scale_color_discrete(name = &quot;Legenda&quot;)+
+  theme(plot.title = element_text(hjust=0.5))
+
+p4</code></pre>
+<p><img src="notebook_lista4_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="section-6" class="section level3">
+<h3>7)</h3>
+<p>Gere valores de parâmetros para 50 itens, gere as respostas para estes itens para 1000 respondentes, ajuste o modelo de resposta gradual aos dados e elabore o gráfico das proficiências estimadas versus proficiências verdadeiras. Compare este gráfico com aquele para as estimativas obtidas a partir dos 9 itens originais.</p>
+<hr />
+<p>Preparação:</p>
+<pre class="r"><code>set.seed(2345) # semente
+n.itens &lt;- 50
+aa &lt;- runif(n.itens,0.7,2) # parametros de discriminacao
+bbb &lt;- matrix(rnorm(50*3,0,1), nrow=50)
+bb &lt;- apply(bbb,1,sort)
+# n.itens &lt;- 50
+
+nr &lt;- 1000 # numero de respondentes
+
+### geracao das proficiencias
+
+theta &lt;- rnorm(nr,0,1)
+resp &lt;- matrix(0,nr,n.itens)
+
+### geracao das respostas
+
+mat.prob &lt;- matrix(0,n.itens,4)
+
+for (j in 1:nr) {
+  mat.prob &lt;- cbind(rep(0,n.itens),
+                    exp(-aa*(theta[j]-bb[1,])),
+                    exp(-aa*(theta[j]-bb[2,])),
+                    exp(-aa*(theta[j]-bb[3,])))
+  mat.prob &lt;- 1/(1+mat.prob)
+  mat.prob &lt;- cbind(-t(apply(mat.prob,1,diff)),mat.prob[,4])
+  for (i in 1:n.itens)
+    resp[j,i] &lt;- sample(4,1,replace=F,mat.prob[i,])
+  }
+
+# write(t(resp),file=&quot;/home/allan/Documents/1S2018/TRI/unidade4/lista4/dados.mrg_50.txt&quot;,ncol=50)
+resp2 &lt;- read.table(file=&quot;/home/allan/Documents/1S2018/TRI/unidade4/lista4/dados.mrg_50.txt&quot;)</code></pre>
+<p></p>
+<p>Ajuste do modelo:</p>
+<pre class="r"><code># --- 2ª parte - utilizar as respostas geradas (com os thetas simulados) para estimar novos parametros
+### ajuste do modelo de resposta gradual via &quot;mirt&quot; utilizando as respostas simuladas
+set.seed(2345) # semente
+mrg_50 &lt;- mirt(resp2,1,itemtype=c(&#39;graded&#39;))
+
+prof.est_50 &lt;- fscores(mrg_50, full.scores=TRUE)
+par.est_50 &lt;- coef(mrg_50,IRTpars=TRUE)
+
+# plot(theta,prof.est_50)
+# abline(0,1)</code></pre>
+<p></p>
+<p>Gráfico:</p>
+<pre class="r"><code>library(ggplot2)
+p5 &lt;- ggplot()+
+  geom_point(aes(x=theta, y=prof.est_50), colour=&quot;purple&quot;)+
+  geom_abline(intercept = 0, slope=1)+
+  xlab( &quot;theta real&quot; )+
+  ylab(&quot;theta estimado&quot;)+
+  labs(title=&quot;Proficiências&quot;)+
+  theme(plot.title = element_text(hjust=0.5))
+
+p5</code></pre>
+<p><img src="notebook_lista4_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Ao utilizarmos um teste com 50 itens, não ocorreu empates nas estimativas de proficiências como ocorreu para o teste com 9 itens. Isso é esperado, pois a probabilidade de ocorrência de empates aumenta, conforme temos menos itens em nosso teste. A título de ilustração, no ENEM, por exemplo, por ser um teste com grande número de itens, há pouca chance de que ocorram empates nas estimativas de proficiências.</p>
+<hr />
+<hr />
+</div>
+<div id="referencias-bibliograficas" class="section level3">
+<h3>Referências Bibliográficas</h3>
+<p>Andrade, F. D., Tavares, H.R. e Valle, R. C. <em>Teoria de Resposta ao Item: Conceitos e Aplicações</em>, ABE, 2000, Caxambu.</p>
+<p>Costa, M.C.M., <em>Aplicando a Teoria de Resposta ao Item a dados psicométricos</em>, UFRJ, 2014, Rio de Janeiro.</p>
+<hr />
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

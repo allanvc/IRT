@@ -1,0 +1,76 @@
+---
+title: "Exemplos"
+subtitle: "Disciplina: Análise de Dados Categorizados - EST - UnB"
+date: "**Junho de 2018**"
+output: html_document
+---
+
+<!-- para justificar texto no markdown -->
+<!-- https://stackoverflow.com/questions/43222169/how-to-justify-the-text-to-both-sides-when-knitting-html-in-rmarkdown -->
+<style>
+body {
+text-align: justify}
+</style>
+
+---
+---
+
+
+```{r, echo=FALSE}
+
+htmltools::img(src = knitr::image_uri(file.path(R.home("doc"), "html", "logo.jpg")),
+               alt = 'logo',
+               style = 'position:absolute; top:0; right:0; padding:1px;')
+
+```
+
+
+Esta página foi elaborada como parte do Trabalho Final da **Disciplina de Análise de Dados Categorizados** ministrada pelo **Prof. Dr. George Freitas von Borries** no curso de graduação em **Estatística** da **UnB**.
+
+Nos links abaixo você encontrará exemplos com aplicações dos conceitos trabalhados na disciplina - todos implementados em linguagem **R**.
+
+
+<!-- {target="_blank"} -- serve para abrir o link em outra aba -->
+
+---
+
+#### **Regressão Logística**
+
+- [**Challenger**](https://allanvc.github.io/categorical_data_analysis/exemplos/challenger/){target="_blank"}
+
+- [**Beetles**](https://allanvc.github.io/categorical_data_analysis/exemplos/beetles/){target="_blank"}
+
+- [**Horseshoe Crabs**](https://allanvc.github.io/categorical_data_analysis/exemplos/crabs/){target="_blank"}
+
+- [**Reação Alérgica**](https://allanvc.github.io/categorical_data_analysis/exemplos/renal/){target="_blank"}
+
+---
+
+#### **Modelos Logito Multicategorizados**
+
+- [**Alligator**](https://allanvc.github.io/categorical_data_analysis/exemplos/alligator/){target="_blank"}
+
+- [**Ideologia**](https://allanvc.github.io/categorical_data_analysis/exemplos/ideologia/){target="_blank"}
+
+- [**Saúde Mental**](https://allanvc.github.io/categorical_data_analysis/exemplos/mental/){target="_blank"}
+
+---
+
+#### **Modelos Log-Lineares**
+
+- [**Credo em vida após a morte**](https://allanvc.github.io/categorical_data_analysis/exemplos/afterlife/){target="_blank"}
+
+- [**Uso de álcool, cigarro e maconha**](https://allanvc.github.io/categorical_data_analysis/exemplos/drugs/){target="_blank"}
+
+---
+
+#### **Modelos para Dados Pareados**
+
+- [**Avaliação de Político**](https://allanvc.github.io/categorical_data_analysis/exemplos/politico/){target="_blank"}
+
+---
+
+#### **EXTRA -- Demonstação**
+
+- [**Shiny App Curva ROC**](https://allanvc.shinyapps.io/roc_app/){target="_blank"}
+

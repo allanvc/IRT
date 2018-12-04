@@ -1,0 +1,351 @@
+---
+title: "Resolução Lista 3 - TRI"
+author: Allan Vieira - 14/0128492
+output:
+  html_document:
+    df_print: paged
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+<!-- para justificar texto no markdown -->
+<!-- https://stackoverflow.com/questions/43222169/how-to-justify-the-text-to-both-sides-when-knitting-html-in-rmarkdown -->
+
+---
+
+### 1) Expressar a proficiência dos alunos da noite na escala de proficiências dos alunos da manhã utilizando diferentes métodos
+
+---
+
+Leitura e carregamento:
+
+```{r, warning=FALSE, message=FALSE, cache = TRUE}
+# library(dplyr)
+library(readr)
+library(magrittr)
+library(ggplot2)
+# library(reshape2)
+# library(tibble)
+
+# prova:
+saresp.loc <- 'http://www.ufpr.br/~aanjos/TRI/sinape/dados/saresp.dat'
+dados <- read_fwf(saresp.loc, fwf_widths(c(1, -1, 1, -1, 12, 3, -1, rep(1,30))), skip=3, na=' ')
+
+dados <- dados %>%
+  dplyr::select(c(-2,-4,-7)) %>% # usar namespace dos pacotes para não dar erro
+  magrittr::set_colnames(c('grupo', 'escola','id', 'turno', paste('i',1:30,sep=""))) 
+# sol em: https://stackoverflow.com/questions/28100780/use-with-replacement-functions-like-colnames
+
+# gabarito:
+gab <- read_fwf(saresp.loc, fwf_widths(c(-20, rep(1, 30))), n_max=3, na=' ')
+
+gab2 <- gab %>%
+  dplyr::select(-1) %>%
+  magrittr::set_colnames(c(paste('i',1:30,sep=""))) 
+
+```
+
+Verificando os data.frames:
+
+```{r}
+head(dados)
+head(gab2)
+```
+
+
+Estimação dos parâmetros dos itens para os três turnos:
+
+```{r, echo=TRUE, cache=TRUE}
+# preparando os dados
+
+# separando os turnos
+lista_turnos <- dados %>% dplyr::group_by(turno) %>% dplyr::do(data = (.)) %>% dplyr::select(data) %>% purrr::map(identity)
+
+turnos <- c("manha", "noite", "tarde")
+for(i in 1:3){
+  assign(turnos[i], lista_turnos$data[[i]])
+}
+
+gab3 <- matrix(9,nrow(gab2),ncol(gab2))
+
+for (i in 1:nrow(gab3)) {
+  for (j in 1:ncol(gab3)) {
+    if (gab2[i,j]=="A") gab3[i,j] <- 1
+    if (gab2[i,j]=="B") gab3[i,j] <- 2
+    if (gab2[i,j]=="C") gab3[i,j] <- 3
+    if (gab2[i,j]=="D") gab3[i,j] <- 4
+  }
+}
+
+resp.manha <- manha[,5:34]
+resp.manha <- as.matrix(resp.manha)
+resp.m <- matrix(9,nrow(resp.manha),ncol(resp.manha))
+resp.m[resp.manha=="A"] <- 1
+resp.m[resp.manha=="B"] <- 2
+resp.m[resp.manha=="C"] <- 3
+resp.m[resp.manha=="D"] <- 4
+
+for (i in 1:nrow(resp.m)) {
+  for (j in 1:ncol(resp.m)) {
+    if ((resp.m[i,j]!=gab3[1,j])&&(resp.m[i,j]!=9)) resp.m[i,j] <- 0 
+    if (resp.m[i,j]==gab3[1,j]) resp.m[i,j] <- 1 
+  }
+}
+
+resp.m[resp.m==9] <- NA
+
+resp.tarde <- tarde[,5:34]
+resp.tarde <- as.matrix(resp.tarde)
+resp.t <- matrix(9,nrow(resp.tarde),ncol(resp.tarde))
+resp.t[resp.tarde=="A"] <- 1
+resp.t[resp.tarde=="B"] <- 2
+resp.t[resp.tarde=="C"] <- 3
+resp.t[resp.tarde=="D"] <- 4
+
+for (i in 1:nrow(resp.t)) {
+  for (j in 1:ncol(resp.t)) {
+    if ((resp.t[i,j]!=gab3[2,j])&&(resp.t[i,j]!=9)) resp.t[i,j] <- 0 
+    if (resp.t[i,j]==gab3[2,j]) resp.t[i,j] <- 1 
+  }
+}
+
+resp.t[resp.t==9] <- NA
+
+
+resp.noite <- noite[,5:34]
+resp.noite <- as.matrix(resp.noite)
+resp.n <- matrix(9,nrow(resp.noite),ncol(resp.noite))
+resp.n[resp.noite=="A"] <- 1
+resp.n[resp.noite=="B"] <- 2
+resp.n[resp.noite=="C"] <- 3
+resp.n[resp.noite=="D"] <- 4
+
+for (i in 1:nrow(resp.n)) {
+  for (j in 1:ncol(resp.n)) {
+    if ((resp.n[i,j]!=gab3[3,j])&&(resp.n[i,j]!=9)) resp.n[i,j] <- 0 
+    if (resp.n[i,j]==gab3[3,j]) resp.n[i,j] <- 1 
+  }
+}
+
+resp.n[resp.n==9] <- NA
+
+```
+
+
+
+
+```{r, cache=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+# estimativas
+
+library(irtoys)
+
+###### Obtencao das estimativas dos parametros dos itens para turno da manha via pacote "irtoys"
+
+#resp.m.tpm <- tpm(resp.m,constraint=cbind(1:ncol(resp.m),1,0.25))
+resp.m.tpm <- tpm(resp.m)
+par.m.est <- coef(resp.m.tpm) # cc, bb, aa
+
+### estimacao da proficiencia (funcao "eap" serve apenas para o modelo 3PL)
+### matriz com a estimativa da proficiencia e o erro-padrão (1/sqrt(informacao(theta.est)))
+
+theta.m.est <- eap(resp.m, cbind(par.m.est[,3],par.m.est[,2],par.m.est[,1]), qu=normal.qu())
+prof.m.est <- theta.m.est[,1]
+
+###### Obtencao das estimativas dos parametros dos itens para turno da tarde via pacote "irtoys"
+
+#resp.t.tpm <- tpm(resp.t,constraint=cbind(1:ncol(resp.t),1,0.25))
+resp.t.tpm <- tpm(resp.t)
+par.t.est <- coef(resp.t.tpm) # cc, bb, aa
+
+### estimacao da proficiencia (funcao "eap" serve apenas para o modelo 3PL)
+### matriz com a estimativa da proficiencia e o erro-padrão (1/sqrt(informacao(theta.est)))
+
+theta.t.est <- eap(resp.t, cbind(par.t.est[,3],par.t.est[,2],par.t.est[,1]), qu=normal.qu())
+prof.t.est <- theta.t.est[,1]
+
+###### Obtencao das estimativas dos parametros dos itens para turno da noite via pacote "irtoys"
+
+#resp.n.tpm <- tpm(resp.n,constraint=cbind(1:ncol(resp.n),1,0.25))
+resp.n.tpm <- tpm(resp.n)
+par.n.est <- coef(resp.n.tpm) # cc, bb, aa
+
+### estimacao da proficiencia (funcao "eap" serve apenas para o modelo 3PL)
+### matriz com a estimativa da proficiencia e o erro-padrão (1/sqrt(informacao(theta.est)))
+
+theta.n.est <- eap(resp.n, cbind(par.n.est[,3],par.n.est[,2],par.n.est[,1]), qu=normal.qu())
+prof.n.est <- theta.n.est[,1]
+```
+
+---
+
+#### **item a) Equalização via Regressão Linear**
+
+---
+
+```{r}
+########## Equalizacao via regressão linear
+# Equalização 
+#plot(par.m.est[15:19,3],par.n.est[15:19,3])
+#reg.mn.a <- lm(par.n.est[15:19,3]~par.m.est[15:19,3]-1)
+
+reg.mn.b <- lm(par.n.est[15:19,2]~par.m.est[15:19,2]) # soh usando os itens comuns (linhas de 15 a 19)
+
+# alternativa:
+# reg.mn.b <- lm(par.m.est[15:19,2]~par.n.est[15:19,2]) # soh usando os itens comuns (linhas de 15 a 19)
+
+reg.mn.b$coefficients
+
+df_par <- as.data.frame(cbind(par.m.est[15:19,2], par.n.est[15:19,2]), row.names = FALSE)
+
+df_coef <- as.data.frame(cbind(reg.mn.b$coefficients[1], reg.mn.b$coefficients[2]))
+
+library(ggplot2)
+library(magrittr)
+df_par %>%
+  ggplot()+
+  geom_point(aes(x=V1, y=V2), colour="blue")+
+  geom_abline(intercept = df_coef$V1, slope=df_coef$V2)+
+  labs(title="Regressão dos Parâmetros Estimados: turma noite ~ turma manhã")
+
+```
+
+Temos, portanto, a seguinte relação entre os parâmetros de dificuldade $b$ da turma da noite e turma da manhã, segundo a notação de Andrade, Tavares e Valle(2000, p.88), onde $\alpha$ é o coeficiente de correlação angular e $\beta$ o intercepto de nosso modelo de regressão linear:
+
+<!-- O Dalton só denomina com letras diferentes o intecepto, mas o modelo eh feito com lm(noite ~ dia) ou lm(G2 ~ G1) -->
+
+$$b_{G1} = \alpha \space b_{G2} + \beta $$
+$$b_{noite} = (0.8891807\times b_{manhã}) + 0.1743214$$
+
+Já os parâmetros de discriminação são dados por:
+
+$$ a_{G1} = \frac{1}{\alpha} \space a_{G2} $$
+$$ a_{noite} = \frac{1}{0.8891807} \times a_{manhã}$$
+
+Novos parâmetros da turma da noite - equalizados pelos parâmetros da turma da manhã, podem ser obtidos da seguinte forma:
+
+$$b^{manhã}_{noite} = \frac{b_{noite} - 0.1743214}{0.8891807},$$
+onde $b^{manhã}_{noite}$ é o parâmetro de dificuldade da turma da noite na escala da turma da manhã.
+
+$$ a^{manhã}_{noite} = a_{noite}\times 0.8891807$$
+
+Os novos parâmetros da turma da noite equalizados pelos da manhã são apresentadas na tabela abaixo:
+```{r}
+## colocando parametro b da noite na escala da manha
+
+par.n.est.b.eq <- (par.n.est[,2]-reg.mn.b$coefficients[1])/reg.mn.b$coefficients[2]
+
+# dúvida:
+# par.n.est.b.eq <- (par.n.est[,2]*reg.mn.b$coefficients[2]) + reg.mn.b$coefficients[1]
+
+## colocando parametro a da noite na escala da manha
+
+par.n.est.a.eq <-  par.n.est[,3]*reg.mn.b$coefficients[2]
+
+# duvida:
+# par.n.est.a.eq <-  par.n.est[,3]*reg.mn.b$coefficients[2]
+
+tibble::as_tibble(list("Item" = paste0("item", 1:30),
+  "b" = par.n.est.b.eq, "a" = par.n.est.a.eq))
+```
+
+As proficiências equalizadas estimadas podem ser obtidas por:
+
+```{r}
+## proficiencia dos alunos da noite na escala da manha
+prof.n.est.eq <- (prof.n.est-reg.mn.b$coefficients[1])/reg.mn.b$coefficients[2]
+
+# duvida:
+# prof.n.est.eq <- (prof.n.est*reg.mn.b$coefficients[2])/reg.mn.b$coefficients[1]
+```
+
+$$\theta^{manhã}_{noite} = \frac{\theta_{noite} - 0.1743214}{0.8891807},$$ 
+
+onde $\theta^{manhã}_{noite}$ é a habilidade da turma da noite na escala da turma da manhã.
+
+
+---
+
+#### **item b) Equalização via método Média-Desvio**
+
+---
+
+
+```{r}
+########## Equalizacao pelo metodo media-desvio
+
+alfa <- sd(par.m.est[15:19,2])/sd(par.n.est[15:19,2])
+
+beta <- mean(par.m.est[15:19,2])-alfa*mean(par.n.est[15:19,2])
+
+```
+
+Utilizando o método Média-Desvio, o qual consiste em utilizar a média e o desvio padrão do parâmetro $b$ dos itens comuns a ambos os turnos, temos: 
+
+$$ \alpha = \frac{S_{b_{manhã}}}{S_{b_{noite}}} = \frac{0.9513018}{0.9168048} = 1.037627$$
+$$\beta = \bar b_{manhã} - \alpha \times \bar b_{noite} = 1.041596 - 1.037627 \times 1.100489 = -0.1003009$$
+
+Em seguida, calculamos as proficiênias da noite equalizadas pelas da manhã com o referido método:
+
+```{r}
+## proficiencia dos alunos da noite na escala da manha
+
+prof.nm <- alfa*prof.n.est+beta
+
+```
+
+As proficiências equalizadas são obtidas por:
+
+$$\theta^{manhã}_{noite} = \alpha \times \theta_{noite} + \beta = 1.037627 \times \theta_{noite} - 0.1003009,$$
+
+
+onde $\theta^{manhã}_{noite}$ é a habilidade da turma da noite na escala da turma da manhã.
+
+
+
+---
+
+#### **item c) Gráficos**
+
+---
+
+
+Abaixo é apresentado o gráfico de dispersão com as proficiências $\theta$ da escala da noite equalizadas e sem equalização:
+
+```{r}
+## proficiencia dos alunos da noite na escala da manha
+
+# equalizacao via regressao
+library(ggplot2)
+p1 <- ggplot()+
+  geom_point(aes(x=prof.n.est, y=prof.n.est.eq), colour="orange")+
+  geom_abline(intercept = 0, slope=1)+
+  labs(title="Método via Regressão Linear")
+
+# equalizacao metodo media-desvio
+p2 <- ggplot()+
+  geom_point(aes(x=prof.n.est, y=prof.nm), colour="green")+
+  geom_abline(intercept = 0, slope=1)+
+  labs(title="Método Média-Desvio")
+
+library(gridExtra)
+grid.arrange(p1, p2, ncol=2, top="Proficiências turma noturna\nequalizadas vs não equalizadas")
+```
+
+
+No **Método de Equalização via Regressão Linear**, aqueles alunos que já apresentavam proficiências mais baixas na turma da noite acabaram por ficar com proficiências ainda mais reduzidas (abaixo da linha 0-1) após a equalização de suas habilidades com a turma da manhã. Isto faz sentido, pois, se considerarmos que a turma noturna seria uma turna "mais fraca" em termos de habilidades (já que muitos alunos tem que trabalhar ou recuperar-se de reprovações anteriores), ao se equalizar essas habilidades com as habilidades de uma turma supostamente "mais forte", os níveis de proficiência menores tendem a serem ainda mais baixos. Por outro lado, neste mesmo método de equalização, aqueles alunos que já apresentavam maior nível de habilidade na turma da noite, acabam por apresentar um proficiência ainda maior (acima da linha 0-1) após a equalização.
+
+No **Método de Equalização Média-Desvio**, o padrão verificado foi que alunos da turma da noite em níveis de proficiência menores ficaram com habilidade estimada ainda mais baixa ao passo que alunos em níveis mais altos ficaram com proficiências proporcionais ao que já possuiam (exatamente sobre a linha 0-1) após a equalização. Ressalta-se também que o *gap* no extremo inferior da escala de proficiência entre os valores originais da turma da noite e os valores equalizados é um pouco menor com o Método Média-Desvio se em comparação ao Método via Regressão Linear.
+
+---
+
+---
+
+### Referências Bibliográficas
+
+Andrade, F. D., Tavares, H.R. e Valle, R. C. *Teoria de Resposta ao Item: Conceitos e Aplicações*, ABE, 2000, Caxambu.
+
+---
+
