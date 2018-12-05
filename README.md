@@ -1,2 +1,2 @@
-# TRI2
-Item Response Theory examples
+# TRI
+Item Response Theory examples - UnB - 1S2018
